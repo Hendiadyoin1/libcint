@@ -283,7 +283,7 @@ FINT CINT1e_drv(double *out, FINT *dims, CINTEnvVars *envs,
         return has_value;
 }
 
-FINT CINT1e_spinor_drv(double complex *out, FINT *dims, CINTEnvVars *envs,
+FINT CINT1e_spinor_drv(complex_t *out, FINT *dims, CINTEnvVars *envs,
                        double *cache, void (*f_c2s)(), FINT int1e_type)
 {
         if (out == NULL) {

@@ -12,12 +12,12 @@
 #define MAX(X,Y) ((X)>(Y)?(X):(Y))
 #define SQUARE(r)       ((r)[0]*(r)[0] + (r)[1]*(r)[1] + (r)[2]*(r)[2])
 
-void CINTdcmplx_re(const FINT n, double complex *z, const double *re);
-void CINTdcmplx_im(const FINT n, double complex *z, const double *im);
-void CINTdcmplx_pp(const FINT n, double complex *z, const double *re, const double *im);
-void CINTdcmplx_pn(const FINT n, double complex *z, const double *re, const double *im);
-void CINTdcmplx_np(const FINT n, double complex *z, const double *re, const double *im);
-void CINTdcmplx_nn(const FINT n, double complex *z, const double *re, const double *im);
+void CINTdcmplx_re(const FINT n, complex_t *z, const double *re);
+void CINTdcmplx_im(const FINT n, complex_t *z, const double *im);
+void CINTdcmplx_pp(const FINT n, complex_t *z, const double *re, const double *im);
+void CINTdcmplx_pn(const FINT n, complex_t *z, const double *re, const double *im);
+void CINTdcmplx_np(const FINT n, complex_t *z, const double *re, const double *im);
+void CINTdcmplx_nn(const FINT n, complex_t *z, const double *re, const double *im);
 
 double CINTsquare_dist(const double *r1, const double *r2);
 
@@ -47,7 +47,7 @@ void c##NAME##_sph_optimizer(CINTOpt **opt, FINT *atm, FINT natm, \
 } \
 FINT c##NAME(double *out, FINT *shls, FINT *atm, FINT natm, \
             FINT *bas, FINT nbas, double *env, CINTOpt *opt) { \
-        return NAME##_spinor((double complex *)out, NULL, shls, \
+        return NAME##_spinor((complex_t *)out, NULL, shls, \
                              atm, natm, bas, nbas, env, opt, NULL); \
 } \
 void c##NAME##_optimizer(CINTOpt **opt, FINT *atm, FINT natm, \
@@ -67,7 +67,7 @@ FINT c##NAME##_sph(double *out, FINT *shls, FINT *atm, FINT natm, \
 } \
 FINT c##NAME(double *out, FINT *shls, FINT *atm, FINT natm, \
             FINT *bas, FINT nbas, double *env) { \
-        return NAME##_spinor((double complex *)out, NULL, shls, \
+        return NAME##_spinor((complex_t *)out, NULL, shls, \
                              atm, natm, bas, nbas, env, NULL, NULL); \
 }
 

@@ -566,7 +566,7 @@ FINT CINT3c1e_spheric_drv(double *out, FINT *dims, CINTEnvVars *envs, CINTOpt *o
 }
 
 // TODO: ssc type c2s transformation
-FINT CINT3c1e_spinor_drv(double complex *out, FINT *dims, CINTEnvVars *envs, CINTOpt *opt,
+FINT CINT3c1e_spinor_drv(complex_t *out, FINT *dims, CINTEnvVars *envs, CINTOpt *opt,
                         double *cache, void (*f_e1_c2s)(), FINT int_type, FINT is_ssc)
 {
         fprintf(stderr, "CINT3c1e_spinor_drv not implemented");
@@ -619,7 +619,7 @@ FINT int3c1e_cart(double *out, FINT *dims, FINT *shls, FINT *atm, FINT natm,
         return CINT3c1e_cart_drv(out, dims, &envs, opt, cache, 0);
 }
 
-FINT int3c1e_spinor(double complex *out, FINT *dims, FINT *shls, FINT *atm, FINT natm,
+FINT int3c1e_spinor(complex_t *out, FINT *dims, FINT *shls, FINT *atm, FINT natm,
                    FINT *bas, FINT nbas, double *env, CINTOpt *opt, double *cache)
 {
         FINT ng[] = {0, 0, 0, 0, 0, 1, 1, 1};
@@ -654,7 +654,7 @@ FINT int3c1e_rinv_cart(double *out, FINT *dims, FINT *shls, FINT *atm, FINT natm
         return CINT3c1e_cart_drv(out, dims, &envs, opt, cache, 1);
 }
 
-FINT int3c1e_rinv_spinor(double complex *out, FINT *dims, FINT *shls, FINT *atm, FINT natm,
+FINT int3c1e_rinv_spinor(complex_t *out, FINT *dims, FINT *shls, FINT *atm, FINT natm,
                          FINT *bas, FINT nbas, double *env, CINTOpt *opt, double *cache)
 {
         FINT ng[] = {0, 0, 0, 0, 0, 1, 1, 1};

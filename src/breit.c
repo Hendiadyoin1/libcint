@@ -8,7 +8,7 @@
  */
 
 #include <stdlib.h>
-#include <complex.h>
+#include "_complex.h"
 #include "cint_bas.h"
 #include "cart2sph.h"
 #include "g1e.h"
@@ -19,7 +19,7 @@
 #include "misc.h"
 #include "c2f.h"
 
-#define DECLARE(X)      FINT X(double complex *out, FINT *dims, FINT *shls, \
+#define DECLARE(X)      FINT X(complex_t *out, FINT *dims, FINT *shls, \
                               FINT *atm, FINT natm, FINT *bas, FINT nbas, double *env, \
                               CINTOpt *opt, double *cache)
 
@@ -32,7 +32,7 @@ void int2e_breit_##X##_optimizer(CINTOpt **opt, FINT *atm, FINT natm, \
 { \
         *opt = NULL; \
 } \
-FINT int2e_breit_##X##_spinor(double complex *out, FINT *dims, FINT *shls, \
+FINT int2e_breit_##X##_spinor(complex_t *out, FINT *dims, FINT *shls, \
                              FINT *atm, FINT natm, FINT *bas, FINT nbas, double *env, \
                              CINTOpt *opt, double *cache) \
 { \
@@ -40,14 +40,14 @@ FINT int2e_breit_##X##_spinor(double complex *out, FINT *dims, FINT *shls, \
                                 ncomp_tensor, &int2e_##X##_spinor, \
                                 &int2e_gauge_r1_##X##_spinor, &int2e_gauge_r2_##X##_spinor); \
 } \
-FINT cint2e_breit_##X##_spinor(double complex *out, FINT *shls, \
+FINT cint2e_breit_##X##_spinor(complex_t *out, FINT *shls, \
                       FINT *atm, FINT natm, FINT *bas, FINT nbas, double *env, \
                       CINTOpt *opt) \
 { \
         return int2e_breit_##X##_spinor(out, NULL, shls, atm, natm, bas, nbas, env, opt, NULL); \
 }
 
-static void _copy_to_out(double complex *out, double complex *in, FINT *dims, FINT *counts)
+static void _copy_to_out(complex_t *out, complex_t *in, FINT *dims, FINT *counts)
 {
         if (out == in) {
                 return;
@@ -64,7 +64,7 @@ static void _copy_to_out(double complex *out, double complex *in, FINT *dims, FI
         FINT dij = di * dj;
         FINT dijk = dij * dk;
         FINT i, j, k, l;
-        double complex *pin, *pout;
+        complex_t *pin, *pout;
         for (l = 0; l < dl; l++) {
                 for (k = 0; k < dk; k++) {
                         pin  = in  + k * dij;
@@ -79,7 +79,7 @@ static void _copy_to_out(double complex *out, double complex *in, FINT *dims, FI
         }
 }
 
-static FINT _int2e_breit_drv(double complex *out, FINT *dims, FINT *shls,
+static FINT _int2e_breit_drv(complex_t *out, FINT *dims, FINT *shls,
                             FINT *atm, FINT natm, FINT *bas, FINT nbas, double *env,
                             CINTOpt *opt, double *cache, FINT ncomp_tensor,
                             FINT (*f_gaunt)(), FINT (*f_gauge_r1)(), FINT (*f_gauge_r2)())
@@ -98,8 +98,8 @@ static FINT _int2e_breit_drv(double complex *out, FINT *dims, FINT *shls,
         counts[2] = CINTcgto_spinor(shls[2], bas);
         counts[3] = CINTcgto_spinor(shls[3], bas);
         FINT nop = counts[0] * counts[1] * counts[2] * counts[3] * ncomp_tensor;
-        double complex *buf = malloc(sizeof(double complex) * nop*2);
-        double complex *buf1;
+        complex_t *buf = malloc(sizeof(complex_t) * nop*2);
+        complex_t *buf1;
         if (dims == NULL) {
                 dims = counts;
                 buf1 = out;
@@ -216,7 +216,7 @@ FINT int2e_breit_r1p2_sph(double *out, FINT *dims, FINT *shls,
         envs.f_gout = &CINTgout2e_int2e_breit_r1p2;
         return CINT2e_spheric_drv(out, dims, &envs, opt, cache);
 } // int2e_breit_r1p2_sph
-FINT int2e_breit_r1p2_spinor(double complex *out, FINT *dims, FINT *shls,
+FINT int2e_breit_r1p2_spinor(complex_t *out, FINT *dims, FINT *shls,
                 FINT *atm, FINT natm, FINT *bas, FINT nbas, double *env, CINTOpt *opt, double *cache) {
         FINT ng[] = {2, 2, 0, 1, 4, 1, 1, 1};
         CINTEnvVars envs;
@@ -305,7 +305,7 @@ FINT int2e_breit_r2p2_sph(double *out, FINT *dims, FINT *shls,
         envs.f_gout = &CINTgout2e_int2e_breit_r2p2;
         return CINT2e_spheric_drv(out, dims, &envs, opt, cache);
 } // int2e_breit_r2p2_sph
-FINT int2e_breit_r2p2_spinor(double complex *out, FINT *dims, FINT *shls,
+FINT int2e_breit_r2p2_spinor(complex_t *out, FINT *dims, FINT *shls,
                 FINT *atm, FINT natm, FINT *bas, FINT nbas, double *env, CINTOpt *opt, double *cache) {
         FINT ng[] = {2, 1, 0, 2, 4, 1, 1, 1};
         CINTEnvVars envs;

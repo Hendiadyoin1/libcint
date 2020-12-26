@@ -388,7 +388,7 @@ FINT int4c1e_cart(double *out, FINT *dims, FINT *shls, FINT *atm, FINT natm,
         return CINT4c1e_cart_drv(out, dims, &envs, opt, cache);
 }
 
-FINT int4c1e_spinor(double complex *out, FINT *dims, FINT *shls, FINT *atm, FINT natm,
+FINT int4c1e_spinor(complex_t *out, FINT *dims, FINT *shls, FINT *atm, FINT natm,
                    FINT *bas, FINT nbas, double *env, CINTOpt *opt, double *cache)
 {
         fprintf(stderr, "int4c1e_spinor not implemented\n");

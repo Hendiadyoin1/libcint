@@ -5,10 +5,10 @@
  */
 
 #include <math.h>
-#include <complex.h>
+#include "_complex.h"
 #include "cint_const.h"
 
-void CINTdcmplx_re(const FINT n, double complex *z, const double *re)
+void CINTdcmplx_re(const FINT n, complex_t *z, const double *re)
 {
         FINT i;
         for (i = 0; i < n; i++) {
@@ -16,7 +16,7 @@ void CINTdcmplx_re(const FINT n, double complex *z, const double *re)
         }
 }
 
-void CINTdcmplx_im(const FINT n, double complex *z, const double *im)
+void CINTdcmplx_im(const FINT n, complex_t *z, const double *im)
 {
         FINT i;
         for (i = 0; i < n; i++) {
@@ -24,7 +24,7 @@ void CINTdcmplx_im(const FINT n, double complex *z, const double *im)
         }
 }
 
-void CINTdcmplx_pp(const FINT n, double complex *z,
+void CINTdcmplx_pp(const FINT n, complex_t *z,
                    const double *re, const double *im)
 {
         FINT i;
@@ -32,7 +32,7 @@ void CINTdcmplx_pp(const FINT n, double complex *z,
                 z[i] = re[i] + im[i] * _Complex_I;
         }
 }
-void CINTdcmplx_pn(const FINT n, double complex *z,
+void CINTdcmplx_pn(const FINT n, complex_t *z,
                    const double *re, const double *im)
 {
         FINT i;
@@ -40,7 +40,7 @@ void CINTdcmplx_pn(const FINT n, double complex *z,
                 z[i] = re[i] - im[i] * _Complex_I;
         }
 }
-void CINTdcmplx_np(const FINT n, double complex *z,
+void CINTdcmplx_np(const FINT n, complex_t *z,
                    const double *re, const double *im)
 {
         FINT i;
@@ -48,7 +48,7 @@ void CINTdcmplx_np(const FINT n, double complex *z,
                 z[i] = -re[i] + im[i] * _Complex_I;
         }
 }
-void CINTdcmplx_nn(const FINT n, double complex *z,
+void CINTdcmplx_nn(const FINT n, complex_t *z,
                    const double *re, const double *im)
 {
         FINT i;

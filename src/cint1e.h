@@ -3,7 +3,7 @@
  *
  */
 
-#include <complex.h>
+#include "_complex.h"
 #include "config.h"
 
 FINT CINT1e_loop(double *gctr, CINTEnvVars *envs, double *cache);
@@ -13,7 +13,7 @@ FINT CINT1e_nuc_loop(double *gctr, CINTEnvVars *envs, double fac, FINT nuc_id, d
 FINT CINT1e_drv(double *out, FINT *dims, CINTEnvVars *envs,
                double *cache, void (*f_c2s)(), FINT int1e_type);
 
-FINT CINT1e_spinor_drv(double complex *out, FINT *dims, CINTEnvVars *envs,
+FINT CINT1e_spinor_drv(complex_t *out, FINT *dims, CINTEnvVars *envs,
                        double *cache, void (*f_c2s)(), FINT int1e_type);
 
 double CINTnuc_mod(double aij, FINT nuc_id, FINT *atm, double *env);
@@ -24,7 +24,7 @@ FINT CINT3c1e_spheric_drv(double *out, FINT *dims, CINTEnvVars *envs, CINTOpt *o
                          double *cache, void (*f_e1_c2s)(), FINT int_type, FINT is_ssc);
 FINT CINT3c1e_cart_drv(double *out, FINT *dims, CINTEnvVars *envs, CINTOpt *opt,
                       double *cache, FINT int_type);
-FINT CINT3c1e_spinor_drv(double complex *out, FINT *dims, CINTEnvVars *envs, CINTOpt *opt,
+FINT CINT3c1e_spinor_drv(complex_t *out, FINT *dims, CINTEnvVars *envs, CINTOpt *opt,
                         double *cache, void (*f_e1_c2s)(), FINT int_type, FINT is_ssc);
 
 #define INT1E_TYPE_OVLP 0

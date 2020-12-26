@@ -5,7 +5,7 @@
  */
 
 #include <string.h>
-#include <complex.h>
+#include "_complex.h"
 #include "fblas.h"
 
 #define OF_CMPLX        2
@@ -79,7 +79,7 @@ void CINTdmat_transpose(double *a_t, const double *a, const FINT m, const FINT n
 /*
  * a[m,n] -> a_t[n,m]
  */
-void CINTzmat_transpose(double complex *a_t, const double complex *a,
+void CINTzmat_transpose(complex_t *a_t, const complex_t *a,
                         const FINT m, const FINT n)
 {
         FINT i, j;
@@ -108,7 +108,7 @@ void CINTzmat_transpose(double complex *a_t, const double complex *a,
         }
 }
 
-void CINTzmat_dagger(double complex *a_t, const double complex *a,
+void CINTzmat_dagger(complex_t *a_t, const complex_t *a,
                      const FINT m, const FINT n)
 {
         FINT i, j;

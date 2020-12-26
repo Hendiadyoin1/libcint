@@ -31,7 +31,7 @@ void c##NAME##_cart_optimizer_(CINTOpt **opt, FINT *atm, FINT *natm, \
 FINT c##NAME##_(double *out, FINT *shls, FINT *atm, FINT *natm, \
                 FINT *bas, FINT *nbas, double *env, size_t optptr_as_integer8) { \
         CINTOpt **opt = (CINTOpt **)optptr_as_integer8; \
-        return NAME##_spinor((double complex *)out, NULL, shls, \
+        return NAME##_spinor((complex_t *)out, NULL, shls, \
                              atm, *natm, bas, *nbas, env, *opt, NULL); \
 } \
 void c##NAME##_optimizer_(size_t optptr_as_integer8, FINT *atm, FINT *natm, \
@@ -52,7 +52,7 @@ FINT c##NAME##_cart_(double *out, FINT *shls, FINT *atm, FINT *natm, \
 } \
 FINT c##NAME##_(double *out, FINT *shls, FINT *atm, FINT *natm, \
                 FINT *bas, FINT *nbas, double *env) { \
-        return NAME##_spinor((double complex *)out, NULL, shls, \
+        return NAME##_spinor((complex_t *)out, NULL, shls, \
                              atm, *natm, bas, *nbas, env, NULL, NULL); \
 }
 

@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <complex.h>
+#include "_complex.h"
 #include <math.h>
 #include "cint.h"
 
-int cint1e_spnucsp(double complex *buf, int *shls,
+int cint1e_spnucsp(complex_t *buf, int *shls,
                    int *atm, int natm, int *bas, int nbas, double *env);
 
-int cint2e_spsp1(double complex *buf, int *shls,
+int cint2e_spsp1(complex_t *buf, int *shls,
                  int *atm, int natm, int *bas, int nbas, double *env,
                  CINTOpt *opt);
 
@@ -113,11 +113,11 @@ int main()
         int j, k, l;
         int di, dj, dk, dl;
         int shls[4];
-        double complex *buf;
+        complex_t *buf;
 
         i = 0; shls[0] = i; di = CINTcgto_spinor(i, bas);
         j = 1; shls[1] = j; dj = CINTcgto_spinor(j, bas);
-        buf = malloc(sizeof(double complex) * di * dj);
+        buf = malloc(sizeof(complex_t) * di * dj);
         if (0 != cint1e_spnucsp(buf, shls, atm, natm, bas, nbas, env)) {
                 printf("This integral is not 0.\n");
         } else {
@@ -132,7 +132,7 @@ int main()
         j = 1; shls[1] = j; dj = CINTcgto_spinor(j, bas);
         k = 2; shls[2] = k; dk = CINTcgto_spinor(k, bas);
         l = 2; shls[3] = l; dl = CINTcgto_spinor(l, bas);
-        buf = malloc(sizeof(double complex) * di * dj * dk * dl);
+        buf = malloc(sizeof(complex_t) * di * dj * dk * dl);
         if (0 != cint2e_spsp1(buf, shls, atm, natm, bas, nbas, env, NULL)) {
                 printf("This integral is not 0.\n");
         } else {
@@ -146,7 +146,7 @@ int main()
         j = 1; shls[1] = j; dj = CINTcgto_spinor(j, bas);
         k = 2; shls[2] = k; dk = CINTcgto_spinor(k, bas);
         l = 2; shls[3] = l; dl = CINTcgto_spinor(l, bas);
-        buf = malloc(sizeof(double complex) * di * dj * dk * dl);
+        buf = malloc(sizeof(complex_t) * di * dj * dk * dl);
         if (0 != cint2e_spsp1(buf, shls, atm, natm, bas, nbas, env, opt)) {
                 printf("This integral is not 0.\n");
         } else {

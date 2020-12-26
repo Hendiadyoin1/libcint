@@ -12,7 +12,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <complex.h>
+#include "_complex.h"
 #include "cint_const.h"
 #include "cint_bas.h"
 #include "cart2sph.h"
@@ -721,7 +721,7 @@ static const double g_trans_cart2sph[] = {
  * / xyz_alpha \
  * \ xyz_beta  /
  */
-static const double complex g_trans_cart2j[] = {
+static const complex_t g_trans_cart2j[] = {
         0 + 0*_Complex_I,
         1 + 0*_Complex_I,
         1 + 0*_Complex_I,
@@ -2809,8 +2809,8 @@ static FINT _len_spinor(FINT kappa, FINT l)
 
 struct cart2sp_t {
         const double *cart2sph;
-        const double complex *cart2j_lt_l; // j < kappa, l > 0
-        const double complex *cart2j_gt_l; // j > kappa, l < 0
+        const complex_t *cart2j_lt_l; // j < kappa, l > 0
+        const complex_t *cart2j_gt_l; // j > kappa, l < 0
 };
 
 // [*] = n(n+1)(n+2)(n+3)/4+(n+1)(n+2)(n+3)/6
@@ -2835,12 +2835,12 @@ const double *CINTaddress_cart2sph(FINT l)
         return g_c2s[l].cart2sph;
 }
 
-const double complex *CINTaddress_cart2j_lt_l(FINT l)
+const complex_t *CINTaddress_cart2j_lt_l(FINT l)
 {
         return g_c2s[l].cart2j_lt_l;
 }
 
-const double complex *CINTaddress_cart2j_gt_l(FINT l)
+const complex_t *CINTaddress_cart2j_gt_l(FINT l)
 {
         return g_c2s[l].cart2j_gt_l;
 }
@@ -2895,17 +2895,17 @@ static void c2s_dgemm(const char transa, const char transb,
 
 static void c2s_zgemm(const char transa, const char transb,
                       const FINT m, const FINT n, const FINT k,
-                      const double complex alpha, const double complex *a, const FINT lda,
-                      const double complex *b, const FINT ldb,
-                      const double complex beta, double complex *c, const FINT ldc)
+                      const complex_t alpha, const complex_t *a, const FINT lda,
+                      const complex_t *b, const FINT ldb,
+                      const complex_t beta, complex_t *c, const FINT ldc)
 {
 #if defined I8
         FINT i, j, kp;
-        const double complex *pa, *pb;
-        double complex btmp[k];
+        const complex_t *pa, *pb;
+        complex_t btmp[k];
         for (j = 0; j < n; j++) {
                 if (beta == 0) {
-                        memset(c, 0, sizeof(double complex)*m);
+                        memset(c, 0, sizeof(complex_t)*m);
                 } else {
                         for (i = 0; i < m; i++) {
                                 c[i] *= beta;
@@ -3273,12 +3273,12 @@ double *(*c2s_ket_sph1[])(double *gsph, double *gcart,
  * components of the two-component vector, the lower component vector
  * are next to the upper component.
  */
-static void a_bra_cart2spinor_sf(double complex *gsp, FINT nket,
-                                 double complex *gcart, FINT kappa, FINT l)
+static void a_bra_cart2spinor_sf(complex_t *gsp, FINT nket,
+                                 complex_t *gcart, FINT kappa, FINT l)
 {
         FINT nf = (l+1)*(l+2)/2;
         FINT nd = _len_spinor(kappa, l);
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
 
         if (kappa < 0) { // j = l + 1/2
                 coeff_c2s = g_c2s[l].cart2j_gt_l;
@@ -3290,23 +3290,23 @@ static void a_bra_cart2spinor_sf(double complex *gsp, FINT nket,
         c2s_zgemm('C', 'N', nd, nket, nf,
                   1, coeff_c2s+nf, nf*2, gcart, nf, 0, gsp+nd*nket, nd);
 }
-static void a_bra_cart2spinor_e1sf(double complex *gsp, FINT nket,
+static void a_bra_cart2spinor_e1sf(complex_t *gsp, FINT nket,
                                    double *gcart, FINT kappa, FINT l)
 {
         const FINT nf = (l+1)*(l+2)/2;
-        double complex *tmp1 = malloc(sizeof(double complex)*nf*nket);
+        complex_t *tmp1 = malloc(sizeof(complex_t)*nf*nket);
 
         CINTdcmplx_re(nf*nket, tmp1, gcart);
         a_bra_cart2spinor_sf(gsp, nket, tmp1, kappa, l);
         free(tmp1);
 }
 
-static void a_bra_cart2spinor_si(double complex *gsp, FINT nket,
-                                 double complex *gcart, FINT kappa, FINT l)
+static void a_bra_cart2spinor_si(complex_t *gsp, FINT nket,
+                                 complex_t *gcart, FINT kappa, FINT l)
 {
         FINT nf = (l+1)*(l+2)/2;
         FINT nd = _len_spinor(kappa, l);
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
 
         if (kappa < 0) { // j = l + 1/2
                 coeff_c2s = g_c2s[l].cart2j_gt_l;
@@ -3319,12 +3319,12 @@ static void a_bra_cart2spinor_si(double complex *gsp, FINT nket,
                   1, coeff_c2s+nf, nf*2, gcart+nf*nket, nf, 1, gsp, nd);
 }
 
-static void a_ket_cart2spinor(double complex *gsp, FINT nbra,
-                              double complex *gcart, FINT kappa, FINT l)
+static void a_ket_cart2spinor(complex_t *gsp, FINT nbra,
+                              complex_t *gcart, FINT kappa, FINT l)
 {
         FINT nf = (l+1)*(l+2)/2;
         FINT nd = _len_spinor(kappa, l);
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
 
         if (kappa < 0) { // j = l + 1/2
                 coeff_c2s = g_c2s[l].cart2j_gt_l;
@@ -3335,13 +3335,13 @@ static void a_ket_cart2spinor(double complex *gsp, FINT nbra,
                   1, gcart, nbra, coeff_c2s, nf*2, 0, gsp, nbra);
 }
 // with phase "i"
-static void a_iket_cart2spinor(double complex *gsp, FINT nbra,
-                               double complex *gcart, FINT kappa, FINT l)
+static void a_iket_cart2spinor(complex_t *gsp, FINT nbra,
+                               complex_t *gcart, FINT kappa, FINT l)
 {
-        const double complex ZI = 0 + 1 * _Complex_I;
+        const complex_t ZI = 0 + 1 * _Complex_I;
         FINT nf = (l+1)*(l+2)/2;
         FINT nd = _len_spinor(kappa, l);
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
 
         if (kappa < 0) { // j = l + 1/2
                 coeff_c2s = g_c2s[l].cart2j_gt_l;
@@ -3352,11 +3352,11 @@ static void a_iket_cart2spinor(double complex *gsp, FINT nbra,
                   ZI, gcart, nbra, coeff_c2s, nf*2, 0, gsp, nbra);
 }
 
-static void s_bra_cart2spinor_sf(double complex *gsp, FINT nket,
-                                 double complex *gcart, FINT kappa, FINT l)
+static void s_bra_cart2spinor_sf(complex_t *gsp, FINT nket,
+                                 complex_t *gcart, FINT kappa, FINT l)
 {
         //const double *coeff_c2s = g_c2s[0].cart2j_lt_l;
-        double complex *gsp1 = gsp + nket * 2;
+        complex_t *gsp1 = gsp + nket * 2;
         FINT i;
         for (i = 0; i < nket; i++) {
                 gsp [i*2+0] = 0;
@@ -3365,11 +3365,11 @@ static void s_bra_cart2spinor_sf(double complex *gsp, FINT nket,
                 gsp1[i*2+1] = 0;
         }
 }
-static void s_bra_cart2spinor_e1sf(double complex *gsp, FINT nket,
+static void s_bra_cart2spinor_e1sf(complex_t *gsp, FINT nket,
                                    double *gcart, FINT kappa, FINT l)
 {
         //const double *coeff_c2s = g_c2s[0].cart2j_lt_l;;
-        double complex *gsp1 = gsp + nket * 2;
+        complex_t *gsp1 = gsp + nket * 2;
         FINT i;
         for (i = 0; i < nket; i++) {
                 gsp [i*2+0] = 0;
@@ -3378,33 +3378,33 @@ static void s_bra_cart2spinor_e1sf(double complex *gsp, FINT nket,
                 gsp1[i*2+1] = 0;
         }
 }
-static void s_bra_cart2spinor_si(double complex *gsp, FINT nket,
-                                 double complex *gcart, FINT kappa, FINT l)
+static void s_bra_cart2spinor_si(complex_t *gsp, FINT nket,
+                                 complex_t *gcart, FINT kappa, FINT l)
 {
         //const double *coeff_c2s = g_c2s[0].cart2j_lt_l;;
-        double complex *gcart1 = gcart + nket;
+        complex_t *gcart1 = gcart + nket;
         FINT i;
         for (i = 0; i < nket; i++) {
                 gsp[i*2+0] = gcart1[i];
                 gsp[i*2+1] = gcart [i];
         }
 }
-static void s_ket_cart2spinor(double complex *gsp, FINT nbra,
-                              double complex *gcart, FINT kappa, FINT l)
+static void s_ket_cart2spinor(complex_t *gsp, FINT nbra,
+                              complex_t *gcart, FINT kappa, FINT l)
 {
-        double complex *gsp1 = gsp + nbra;
-        double complex *gcart1 = gcart + nbra;
+        complex_t *gsp1 = gsp + nbra;
+        complex_t *gcart1 = gcart + nbra;
         FINT i;
         for (i = 0; i < nbra; i++) {
                 gsp [i] = gcart1[i];
                 gsp1[i] = gcart [i];
         }
 }
-static void s_iket_cart2spinor(double complex *gsp, FINT nbra,
-                               double complex *gcart, FINT kappa, FINT l)
+static void s_iket_cart2spinor(complex_t *gsp, FINT nbra,
+                               complex_t *gcart, FINT kappa, FINT l)
 {
-        double complex *gsp1 = gsp + nbra;
-        double complex *gcart1 = gcart + nbra;
+        complex_t *gsp1 = gsp + nbra;
+        complex_t *gcart1 = gcart + nbra;
         FINT i;
         for (i = 0; i < nbra; i++) {
                 gsp [i] = gcart1[i] * _Complex_I;
@@ -3412,12 +3412,12 @@ static void s_iket_cart2spinor(double complex *gsp, FINT nbra,
         }
 }
 
-static void p_bra_cart2spinor_sf(double complex *gsp, FINT nket,
-                                 double complex *gcart, FINT kappa, FINT l)
+static void p_bra_cart2spinor_sf(complex_t *gsp, FINT nket,
+                                 complex_t *gcart, FINT kappa, FINT l)
 {
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
         FINT nd = _len_spinor(kappa, l);
-        double complex *gsp1 = gsp + nket * nd;
+        complex_t *gsp1 = gsp + nket * nd;
         FINT i;
 
         if (kappa >= 0) {
@@ -3453,12 +3453,12 @@ static void p_bra_cart2spinor_sf(double complex *gsp, FINT nket,
                 }
         }
 }
-static void p_bra_cart2spinor_e1sf(double complex *gsp, FINT nket,
+static void p_bra_cart2spinor_e1sf(complex_t *gsp, FINT nket,
                                    double *gcart, FINT kappa, FINT l)
 {
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
         FINT nd = _len_spinor(kappa, l);
-        double complex *gsp1 = gsp + nket * nd;
+        complex_t *gsp1 = gsp + nket * nd;
         FINT i;
 
         if (kappa >= 0) {
@@ -3494,10 +3494,10 @@ static void p_bra_cart2spinor_e1sf(double complex *gsp, FINT nket,
                 }
         }
 }
-static void p_bra_cart2spinor_si(double complex *gsp, FINT nket,
-                                 double complex *gcart, FINT kappa, FINT l)
+static void p_bra_cart2spinor_si(complex_t *gsp, FINT nket,
+                                 complex_t *gcart, FINT kappa, FINT l)
 {
-        double complex *gcart1 = gcart + nket * 3;
+        complex_t *gcart1 = gcart + nket * 3;
         const complex double *coeff_c2s;
         FINT nd = _len_spinor(kappa, l);
         FINT i;
@@ -3535,10 +3535,10 @@ static void p_bra_cart2spinor_si(double complex *gsp, FINT nket,
                 }
         }
 }
-static void p_ket_cart2spinor(double complex *gsp, FINT nbra,
-                              double complex *gcart, FINT kappa, FINT l)
+static void p_ket_cart2spinor(complex_t *gsp, FINT nbra,
+                              complex_t *gcart, FINT kappa, FINT l)
 {
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
         FINT i;
 
         if (kappa >= 0) {
@@ -3569,10 +3569,10 @@ static void p_ket_cart2spinor(double complex *gsp, FINT nbra,
                 }
         }
 }
-static void p_iket_cart2spinor(double complex *gsp, FINT nbra,
-                               double complex *gcart, FINT kappa, FINT l)
+static void p_iket_cart2spinor(complex_t *gsp, FINT nbra,
+                               complex_t *gcart, FINT kappa, FINT l)
 {
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
         FINT i;
 
         if (kappa >= 0) {
@@ -3604,12 +3604,12 @@ static void p_iket_cart2spinor(double complex *gsp, FINT nbra,
         }
 }
 
-static void d_bra_cart2spinor_sf(double complex *gsp, FINT nket,
-                                 double complex *gcart, FINT kappa, FINT l)
+static void d_bra_cart2spinor_sf(complex_t *gsp, FINT nket,
+                                 complex_t *gcart, FINT kappa, FINT l)
 {
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
         FINT nd = _len_spinor(kappa, l);
-        double complex *gsp1 = gsp + nket * nd;
+        complex_t *gsp1 = gsp + nket * nd;
         FINT i;
 
         if (kappa >= 0) {
@@ -3676,12 +3676,12 @@ static void d_bra_cart2spinor_sf(double complex *gsp, FINT nket,
                 }
         }
 }
-static void d_bra_cart2spinor_e1sf(double complex *gsp, FINT nket,
+static void d_bra_cart2spinor_e1sf(complex_t *gsp, FINT nket,
                                    double *gcart, FINT kappa, FINT l)
 {
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
         FINT nd = _len_spinor(kappa, l);
-        double complex *gsp1 = gsp + nket * nd;
+        complex_t *gsp1 = gsp + nket * nd;
         FINT i;
 
         if (kappa >= 0) {
@@ -3748,12 +3748,12 @@ static void d_bra_cart2spinor_e1sf(double complex *gsp, FINT nket,
                 }
         }
 }
-static void d_bra_cart2spinor_si(double complex *gsp, FINT nket,
-                                 double complex *gcart, FINT kappa, FINT l)
+static void d_bra_cart2spinor_si(complex_t *gsp, FINT nket,
+                                 complex_t *gcart, FINT kappa, FINT l)
 {
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
         FINT nd = _len_spinor(kappa, l);
-        double complex *gcart1 = gcart + nket * 6;
+        complex_t *gcart1 = gcart + nket * 6;
         FINT i;
 
         if (kappa >= 0) {
@@ -3819,10 +3819,10 @@ static void d_bra_cart2spinor_si(double complex *gsp, FINT nket,
                 }
         }
 }
-static void d_ket_cart2spinor(double complex *gsp, FINT nbra,
-                              double complex *gcart, FINT kappa, FINT l)
+static void d_ket_cart2spinor(complex_t *gsp, FINT nbra,
+                              complex_t *gcart, FINT kappa, FINT l)
 {
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
         FINT i;
 
         if (kappa >= 0) {
@@ -3883,10 +3883,10 @@ static void d_ket_cart2spinor(double complex *gsp, FINT nbra,
                 }
         }
 }
-static void d_iket_cart2spinor(double complex *gsp, FINT nbra,
-                               double complex *gcart, FINT kappa, FINT l)
+static void d_iket_cart2spinor(complex_t *gsp, FINT nbra,
+                               complex_t *gcart, FINT kappa, FINT l)
 {
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
         FINT i;
 
         if (kappa >= 0) {
@@ -3948,12 +3948,12 @@ static void d_iket_cart2spinor(double complex *gsp, FINT nbra,
         }
 }
 
-static void f_bra_cart2spinor_sf(double complex *gsp, FINT nket,
-                                 double complex *gcart, FINT kappa, FINT l)
+static void f_bra_cart2spinor_sf(complex_t *gsp, FINT nket,
+                                 complex_t *gcart, FINT kappa, FINT l)
 {
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
         FINT nd = _len_spinor(kappa, l);
-        double complex *gsp1 = gsp + nket * nd;
+        complex_t *gsp1 = gsp + nket * nd;
         FINT i;
 
         if (kappa >= 0) {
@@ -4081,12 +4081,12 @@ static void f_bra_cart2spinor_sf(double complex *gsp, FINT nket,
                 }
         }
 }
-static void f_bra_cart2spinor_e1sf(double complex *gsp, FINT nket,
+static void f_bra_cart2spinor_e1sf(complex_t *gsp, FINT nket,
                                    double *gcart, FINT kappa, FINT l)
 {
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
         FINT nd = _len_spinor(kappa, l);
-        double complex *gsp1 = gsp + nket * nd;
+        complex_t *gsp1 = gsp + nket * nd;
         FINT i;
 
         if (kappa >= 0) {
@@ -4214,12 +4214,12 @@ static void f_bra_cart2spinor_e1sf(double complex *gsp, FINT nket,
                 }
         }
 }
-static void f_bra_cart2spinor_si(double complex *gsp, FINT nket,
-                                 double complex *gcart, FINT kappa, FINT l)
+static void f_bra_cart2spinor_si(complex_t *gsp, FINT nket,
+                                 complex_t *gcart, FINT kappa, FINT l)
 {
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
         FINT nd = _len_spinor(kappa, l);
-        double complex *gcart1 = gcart + nket * 10;
+        complex_t *gcart1 = gcart + nket * 10;
         FINT i;
 
         if (kappa >= 0) {
@@ -4348,10 +4348,10 @@ static void f_bra_cart2spinor_si(double complex *gsp, FINT nket,
                 }
         }
 }
-static void f_ket_cart2spinor(double complex *gsp, FINT nbra,
-                              double complex *gcart, FINT kappa, FINT l)
+static void f_ket_cart2spinor(complex_t *gsp, FINT nbra,
+                              complex_t *gcart, FINT kappa, FINT l)
 {
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
         FINT i;
 
         if (kappa >= 0) {
@@ -4474,10 +4474,10 @@ static void f_ket_cart2spinor(double complex *gsp, FINT nbra,
                 }
         }
 }
-static void f_iket_cart2spinor(double complex *gsp, FINT nbra,
-                               double complex *gcart, FINT kappa, FINT l)
+static void f_iket_cart2spinor(complex_t *gsp, FINT nbra,
+                               complex_t *gcart, FINT kappa, FINT l)
 {
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
         FINT i;
 
         if (kappa >= 0) {
@@ -4601,12 +4601,12 @@ static void f_iket_cart2spinor(double complex *gsp, FINT nbra,
         }
 }
 
-static void g_bra_cart2spinor_sf(double complex *gsp, FINT nket,
-                                 double complex *gcart, FINT kappa, FINT l)
+static void g_bra_cart2spinor_sf(complex_t *gsp, FINT nket,
+                                 complex_t *gcart, FINT kappa, FINT l)
 {
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
         FINT nd = _len_spinor(kappa, l);
-        double complex *gsp1 = gsp + nket * nd;
+        complex_t *gsp1 = gsp + nket * nd;
         FINT i;
 
         if (kappa >= 0) {
@@ -4817,12 +4817,12 @@ static void g_bra_cart2spinor_sf(double complex *gsp, FINT nket,
                 }
         }
 }
-static void g_bra_cart2spinor_e1sf(double complex *gsp, FINT nket,
+static void g_bra_cart2spinor_e1sf(complex_t *gsp, FINT nket,
                                    double *gcart, FINT kappa, FINT l)
 {
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
         FINT nd = _len_spinor(kappa, l);
-        double complex *gsp1 = gsp + nket * nd;
+        complex_t *gsp1 = gsp + nket * nd;
         FINT i;
 
         if (kappa >= 0) {
@@ -5033,12 +5033,12 @@ static void g_bra_cart2spinor_e1sf(double complex *gsp, FINT nket,
                 }
         }
 }
-static void g_bra_cart2spinor_si(double complex *gsp, FINT nket,
-                                 double complex *gcart, FINT kappa, FINT l)
+static void g_bra_cart2spinor_si(complex_t *gsp, FINT nket,
+                                 complex_t *gcart, FINT kappa, FINT l)
 {
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
         FINT nd = _len_spinor(kappa, l);
-        double complex *gcart1 = gcart + nket * 15;
+        complex_t *gcart1 = gcart + nket * 15;
         FINT i;
 
         if (kappa >= 0) {
@@ -5250,10 +5250,10 @@ static void g_bra_cart2spinor_si(double complex *gsp, FINT nket,
                 }
         }
 }
-static void g_ket_cart2spinor(double complex *gsp, FINT nbra,
-                              double complex *gcart, FINT kappa, FINT l)
+static void g_ket_cart2spinor(complex_t *gsp, FINT nbra,
+                              complex_t *gcart, FINT kappa, FINT l)
 {
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
         FINT i;
 
         if (kappa >= 0) {
@@ -5458,10 +5458,10 @@ static void g_ket_cart2spinor(double complex *gsp, FINT nbra,
                 }
         }
 }
-static void g_iket_cart2spinor(double complex *gsp, FINT nbra,
-                               double complex *gcart, FINT kappa, FINT l)
+static void g_iket_cart2spinor(complex_t *gsp, FINT nbra,
+                               complex_t *gcart, FINT kappa, FINT l)
 {
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
         FINT i;
 
         if (kappa >= 0) {
@@ -5725,18 +5725,18 @@ void (*c2s_bra_spinor_si[])() = {
 /*
  * gspa and gspb for upper and lower components of two component vector
  */
-static void a_ket_cart2spinor_e1sf(double complex *gspa, double complex *gspb,
+static void a_ket_cart2spinor_e1sf(complex_t *gspa, complex_t *gspb,
                                    double *gcart,
                                    FINT lds, FINT nbra, FINT kappa, FINT l)
 {
-        const double complex Z0 = 0;
-        const double complex Z1 = 1;
+        const complex_t Z0 = 0;
+        const complex_t Z1 = 1;
         const char TRANS_N = 'N';
         FINT nf = (l+1)*(l+2)/2;
         FINT nf2 = nf * 2;
         FINT nd = _len_spinor(kappa, l);
-        const double complex *coeff_c2s;
-        double complex *tmp = malloc(sizeof(double complex)*nf*nbra);
+        const complex_t *coeff_c2s;
+        complex_t *tmp = malloc(sizeof(complex_t)*nf*nbra);
         CINTdcmplx_re(nf*nbra, tmp, gcart);
 
         if (kappa < 0) { // j = l + 1/2
@@ -5751,18 +5751,18 @@ static void a_ket_cart2spinor_e1sf(double complex *gspa, double complex *gspb,
         free(tmp);
 }
 // with phase "i"
-static void a_iket_cart2spinor_e1sf(double complex *gspa, double complex *gspb,
+static void a_iket_cart2spinor_e1sf(complex_t *gspa, complex_t *gspb,
                                     double *gcart,
                                     FINT lds, FINT nbra, FINT kappa, FINT l)
 {
-        const double complex Z0 = 0;
-        const double complex ZI = 0 + 1 * _Complex_I;
+        const complex_t Z0 = 0;
+        const complex_t ZI = 0 + 1 * _Complex_I;
         const char TRANS_N = 'N';
         FINT nf = (l+1)*(l+2)/2;
         FINT nf2 = nf * 2;
         FINT nd = _len_spinor(kappa, l);
-        const double complex *coeff_c2s;
-        double complex *tmp = malloc(sizeof(double complex)*nf*nbra);
+        const complex_t *coeff_c2s;
+        complex_t *tmp = malloc(sizeof(complex_t)*nf*nbra);
         CINTdcmplx_re(nf*nbra, tmp, gcart);
 
         if (kappa < 0) { // j = l + 1/2
@@ -5777,18 +5777,18 @@ static void a_iket_cart2spinor_e1sf(double complex *gspa, double complex *gspb,
         free(tmp);
 }
 
-static void a_ket_cart2spinor_si(double complex *gspa, double complex *gspb,
-                                 double complex *gcart,
+static void a_ket_cart2spinor_si(complex_t *gspa, complex_t *gspb,
+                                 complex_t *gcart,
                                  FINT lds, FINT nbra, FINT kappa, FINT l)
 {
-        const double complex Z0 = 0;
-        const double complex Z1 = 1;
+        const complex_t Z0 = 0;
+        const complex_t Z1 = 1;
         const char TRANS_N = 'N';
         FINT nf = (l+1)*(l+2)/2;
         FINT nf2 = nf * 2;
         FINT nd = _len_spinor(kappa, l);
-        const double complex *coeff_c2s;
-        double complex *gcart1 = gcart + nbra * nf2;
+        const complex_t *coeff_c2s;
+        complex_t *gcart1 = gcart + nbra * nf2;
 
         if (kappa < 0) { // j = l + 1/2
                 coeff_c2s = g_c2s[l].cart2j_gt_l;
@@ -5801,7 +5801,7 @@ static void a_ket_cart2spinor_si(double complex *gspa, double complex *gspb,
                &Z1, gcart1, &nbra, coeff_c2s, &nf2, &Z0, gspb, &lds);
 }
 
-static void s_ket_cart2spinor_e1sf(double complex *gspa, double complex *gspb,
+static void s_ket_cart2spinor_e1sf(complex_t *gspa, complex_t *gspb,
                                    double *gcart,
                                    FINT lds, FINT nbra, FINT kappa, FINT l)
 {
@@ -5813,7 +5813,7 @@ static void s_ket_cart2spinor_e1sf(double complex *gspa, double complex *gspb,
                 gspb[lds+i] = 0;
         }
 }
-static void s_iket_cart2spinor_e1sf(double complex *gspa, double complex *gspb,
+static void s_iket_cart2spinor_e1sf(complex_t *gspa, complex_t *gspb,
                                     double *gcart,
                                     FINT lds, FINT nbra, FINT kappa, FINT l)
 {
@@ -5825,14 +5825,14 @@ static void s_iket_cart2spinor_e1sf(double complex *gspa, double complex *gspb,
                 gspb[lds+i] = 0;
         }
 }
-static void s_ket_cart2spinor_si(double complex *gspa, double complex *gspb,
-                                 double complex *gcart,
+static void s_ket_cart2spinor_si(complex_t *gspa, complex_t *gspb,
+                                 complex_t *gcart,
                                  FINT lds, FINT nbra, FINT kappa, FINT l)
 {
-        double complex *gcart11 = gcart;
-        double complex *gcart12 = gcart11 + nbra;
-        double complex *gcart21 = gcart12 + nbra;
-        double complex *gcart22 = gcart21 + nbra;
+        complex_t *gcart11 = gcart;
+        complex_t *gcart12 = gcart11 + nbra;
+        complex_t *gcart21 = gcart12 + nbra;
+        complex_t *gcart22 = gcart21 + nbra;
         FINT i;
         for (i = 0; i < nbra; i++) {
                 gspa[    i] = gcart12[i];
@@ -5842,11 +5842,11 @@ static void s_ket_cart2spinor_si(double complex *gspa, double complex *gspb,
         }
 }
 
-static void p_ket_cart2spinor_e1sf(double complex *gspa, double complex *gspb,
+static void p_ket_cart2spinor_e1sf(complex_t *gspa, complex_t *gspb,
                                    double *gcart,
                                    FINT lds, FINT nbra, FINT kappa, FINT l)
 {
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
         FINT i;
 
         if (kappa >= 0) {
@@ -5880,11 +5880,11 @@ static void p_ket_cart2spinor_e1sf(double complex *gspa, double complex *gspb,
                 }
         }
 }
-static void p_iket_cart2spinor_e1sf(double complex *gspa, double complex *gspb,
+static void p_iket_cart2spinor_e1sf(complex_t *gspa, complex_t *gspb,
                                     double *gcart,
                                     FINT lds, FINT nbra, FINT kappa, FINT l)
 {
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
         FINT i;
 
         if (kappa >= 0) {
@@ -5918,12 +5918,12 @@ static void p_iket_cart2spinor_e1sf(double complex *gspa, double complex *gspb,
                 }
         }
 }
-static void p_ket_cart2spinor_si(double complex *gspa, double complex *gspb,
-                                 double complex *gcart,
+static void p_ket_cart2spinor_si(complex_t *gspa, complex_t *gspb,
+                                 complex_t *gcart,
                                  FINT lds, FINT nbra, FINT kappa, FINT l)
 {
-        double complex *gcart1 = gcart + nbra*6;
-        const double complex *coeff_c2s;
+        complex_t *gcart1 = gcart + nbra*6;
+        const complex_t *coeff_c2s;
         FINT i;
 
         if (kappa >= 0) {
@@ -5972,11 +5972,11 @@ static void p_ket_cart2spinor_si(double complex *gspa, double complex *gspb,
         }
 }
 
-static void d_ket_cart2spinor_e1sf(double complex *gspa, double complex *gspb,
+static void d_ket_cart2spinor_e1sf(complex_t *gspa, complex_t *gspb,
                                    double *gcart,
                                    FINT lds, FINT nbra, FINT kappa, FINT l)
 {
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
         FINT i;
 
         if (kappa >= 0) {
@@ -6041,11 +6041,11 @@ static void d_ket_cart2spinor_e1sf(double complex *gspa, double complex *gspb,
                 }
         }
 }
-static void d_iket_cart2spinor_e1sf(double complex *gspa, double complex *gspb,
+static void d_iket_cart2spinor_e1sf(complex_t *gspa, complex_t *gspb,
                                     double *gcart,
                                     FINT lds, FINT nbra, FINT kappa, FINT l)
 {
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
         FINT i;
 
         if (kappa >= 0) {
@@ -6111,12 +6111,12 @@ static void d_iket_cart2spinor_e1sf(double complex *gspa, double complex *gspb,
                 }
         }
 }
-static void d_ket_cart2spinor_si(double complex *gspa, double complex *gspb,
-                                 double complex *gcart,
+static void d_ket_cart2spinor_si(complex_t *gspa, complex_t *gspb,
+                                 complex_t *gcart,
                                  FINT lds, FINT nbra, FINT kappa, FINT l)
 {
-        double complex *gcart1 = gcart + nbra*12;
-        const double complex *coeff_c2s;
+        complex_t *gcart1 = gcart + nbra*12;
+        const complex_t *coeff_c2s;
         FINT i;
 
         if (kappa >= 0) {
@@ -6225,11 +6225,11 @@ static void d_ket_cart2spinor_si(double complex *gspa, double complex *gspb,
         }
 }
 
-static void f_ket_cart2spinor_e1sf(double complex *gspa, double complex *gspb,
+static void f_ket_cart2spinor_e1sf(complex_t *gspa, complex_t *gspb,
                                    double *gcart,
                                    FINT lds, FINT nbra, FINT kappa, FINT l)
 {
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
         FINT i;
 
         if (kappa >= 0) {
@@ -6355,11 +6355,11 @@ static void f_ket_cart2spinor_e1sf(double complex *gspa, double complex *gspb,
                 }
         }
 }
-static void f_iket_cart2spinor_e1sf(double complex *gspa, double complex *gspb,
+static void f_iket_cart2spinor_e1sf(complex_t *gspa, complex_t *gspb,
                                     double *gcart,
                                     FINT lds, FINT nbra, FINT kappa, FINT l)
 {
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
         FINT i;
 
         if (kappa >= 0) {
@@ -6485,12 +6485,12 @@ static void f_iket_cart2spinor_e1sf(double complex *gspa, double complex *gspb,
                 }
         }
 }
-static void f_ket_cart2spinor_si(double complex *gspa, double complex *gspb,
-                                 double complex *gcart,
+static void f_ket_cart2spinor_si(complex_t *gspa, complex_t *gspb,
+                                 complex_t *gcart,
                                  FINT lds, FINT nbra, FINT kappa, FINT l)
 {
-        double complex *gcart1 = gcart + nbra*20;
-        const double complex *coeff_c2s;
+        complex_t *gcart1 = gcart + nbra*20;
+        const complex_t *coeff_c2s;
         FINT i;
 
         if (kappa >= 0) {
@@ -6723,11 +6723,11 @@ static void f_ket_cart2spinor_si(double complex *gspa, double complex *gspb,
         }
 }
 
-static void g_ket_cart2spinor_e1sf(double complex *gspa, double complex *gspb,
+static void g_ket_cart2spinor_e1sf(complex_t *gspa, complex_t *gspb,
                                    double *gcart,
                                    FINT lds, FINT nbra, FINT kappa, FINT l)
 {
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
         FINT i;
 
         if (kappa >= 0) {
@@ -6935,11 +6935,11 @@ static void g_ket_cart2spinor_e1sf(double complex *gspa, double complex *gspb,
                 }
         }
 }
-static void g_iket_cart2spinor_e1sf(double complex *gspa, double complex *gspb,
+static void g_iket_cart2spinor_e1sf(complex_t *gspa, complex_t *gspb,
                                     double *gcart,
                                     FINT lds, FINT nbra, FINT kappa, FINT l)
 {
-        const double complex *coeff_c2s;
+        const complex_t *coeff_c2s;
         FINT i;
 
         if (kappa >= 0) {
@@ -7147,12 +7147,12 @@ static void g_iket_cart2spinor_e1sf(double complex *gspa, double complex *gspb,
                 }
         }
 }
-static void g_ket_cart2spinor_si(double complex *gspa, double complex *gspb,
-                                 double complex *gcart,
+static void g_ket_cart2spinor_si(complex_t *gspa, complex_t *gspb,
+                                 complex_t *gcart,
                                  FINT lds, FINT nbra, FINT kappa, FINT l)
 {
-        double complex *gcart1 = gcart + nbra*30;
-        const double complex *coeff_c2s;
+        complex_t *gcart1 = gcart + nbra*30;
+        const complex_t *coeff_c2s;
         FINT i;
 
         if (kappa >= 0) {
@@ -7591,14 +7591,14 @@ void (*c2s_ket_spinor_si[])() = {
 /*
  * (i,k,l,j) -> (k,i,j,l)
  */
-static void zswap_ik_jl(double complex *new, const double complex *old,
+static void zswap_ik_jl(complex_t *new, const complex_t *old,
                         const FINT ni, const FINT nj, const FINT nk, const FINT nl)
 {
         FINT j, l;
         FINT dlo = ni * nk; // stride of (i,k,l++,j)
         FINT djo = ni * nk * nl; // stride of (i,k,l,j++)
         FINT djn = nk * ni; // stride of (k,i,j++,l)
-        const double complex *pold;
+        const complex_t *pold;
 
         for (l = 0; l < nl; l++) {
                 pold = old + l * dlo;
@@ -7624,7 +7624,7 @@ static void dcopy_ij(double *opij, const double *gctr,
                 gctr += mi;
         }
 }
-static void zcopy_ij(double complex *opij, const double complex *gctr, 
+static void zcopy_ij(complex_t *opij, const complex_t *gctr, 
                      const FINT ni, const FINT nj, const FINT mi, const FINT mj)
 {
         FINT i, j;
@@ -7735,13 +7735,13 @@ static void dcopy_iklj(double *fijkl, const double *gctr,
         }
 }
 
-static void zcopy_kijl(double complex *fijkl, const double complex *gctr,
+static void zcopy_kijl(complex_t *fijkl, const complex_t *gctr,
                        const FINT ni, const FINT nj, const FINT nk, const FINT nl,
                        const FINT mi, const FINT mj, const FINT mk, const FINT ml)
 {
         FINT i, j, k, l;
-        double complex *pl, *pk;
-        const double complex *pgctr;
+        complex_t *pl, *pk;
+        const complex_t *pgctr;
 
         for (l = 0; l < ml; l++) {
                 pl = fijkl + l * nk * ni * nj;
@@ -7757,7 +7757,7 @@ static void zcopy_kijl(double complex *fijkl, const double complex *gctr,
                 }
         }
 }
-static void zcopy_iklj(double complex *fijkl, const double complex *gctr, 
+static void zcopy_iklj(complex_t *fijkl, const complex_t *gctr, 
                        const FINT ni, const FINT nj, const FINT nk, const FINT nl,
                        const FINT mi, const FINT mj, const FINT mk, const FINT ml)
 {
@@ -7766,8 +7766,8 @@ static void zcopy_iklj(double complex *fijkl, const double complex *gctr,
         const FINT mik = mi * mk;
         const FINT mikl = mik * ml;
         FINT i, j, k, l;
-        double complex *pijkl;
-        const double complex *pgctr;
+        complex_t *pijkl;
+        const complex_t *pgctr;
 
         for (l = 0; l < ml; l++) {
                 for (k = 0; k < mk; k++) {
@@ -7814,7 +7814,7 @@ void c2s_dset0(double *out, FINT *dims, FINT *counts)
                 out += nijk;
         }
 }
-void c2s_zset0(double complex *out, FINT *dims, FINT *counts)
+void c2s_zset0(complex_t *out, FINT *dims, FINT *counts)
 {
         FINT ni = dims[0];
         FINT nj = dims[1];
@@ -7832,7 +7832,7 @@ void c2s_zset0(double complex *out, FINT *dims, FINT *counts)
         FINT dj = counts[1];
         FINT dk = counts[2];
         FINT dl = counts[3];
-        double complex *pout;
+        complex_t *pout;
         for (l = 0; l < dl; l++) {
                 for (k = 0; k < dk; k++) {
                         pout = out + k * nij;
@@ -7885,7 +7885,7 @@ void c2s_sph_1e(double *opij, double *gctr, FINT *dims,
 /*
  * 1e integrals, cartesian to spin free spinor.
  */
-void c2s_sf_1e(double complex *opij, double *gctr, FINT *dims,
+void c2s_sf_1e(complex_t *opij, double *gctr, FINT *dims,
                CINTEnvVars *envs, double *cache)
 {
         FINT *shls = envs->shls;
@@ -7907,7 +7907,7 @@ void c2s_sf_1e(double complex *opij, double *gctr, FINT *dims,
         FINT nf2j = nfj + nfj;
         FINT nf = envs->nf;
         FINT ic, jc;
-        double complex *tmp1, *tmp2;
+        complex_t *tmp1, *tmp2;
         MALLOC_INSTACK(tmp1, di*nf2j);
         MALLOC_INSTACK(tmp2, di*nf2j);
 
@@ -7919,7 +7919,7 @@ void c2s_sf_1e(double complex *opij, double *gctr, FINT *dims,
                 gctr += nf;
         } }
 }
-void c2s_sf_1ei(double complex *opij, double *gctr, FINT *dims,
+void c2s_sf_1ei(complex_t *opij, double *gctr, FINT *dims,
                 CINTEnvVars *envs, double *cache)
 {
         FINT *shls = envs->shls;
@@ -7941,7 +7941,7 @@ void c2s_sf_1ei(double complex *opij, double *gctr, FINT *dims,
         FINT nf2j = nfj + nfj;
         FINT nf = envs->nf;
         FINT ic, jc;
-        double complex *tmp1, *tmp2;
+        complex_t *tmp1, *tmp2;
         MALLOC_INSTACK(tmp1, di*nf2j);
         MALLOC_INSTACK(tmp2, di*nf2j);
 
@@ -7958,7 +7958,7 @@ void c2s_sf_1ei(double complex *opij, double *gctr, FINT *dims,
 /*
  * 1e integrals, cartesian to spinor.
  */
-void c2s_si_1e(double complex *opij, double *gctr, FINT *dims,
+void c2s_si_1e(complex_t *opij, double *gctr, FINT *dims,
                CINTEnvVars *envs, double *cache)
 {
         FINT *shls = envs->shls;
@@ -7986,7 +7986,7 @@ void c2s_si_1e(double complex *opij, double *gctr, FINT *dims,
         double *gc_y = gc_x + nf * i_ctr * j_ctr;
         double *gc_z = gc_y + nf * i_ctr * j_ctr;
         double *gc_1 = gc_z + nf * i_ctr * j_ctr;
-        double complex *tmp1, *tmp2;
+        complex_t *tmp1, *tmp2;
         MALLOC_INSTACK(tmp1, nf2i*nf2j);
         MALLOC_INSTACK(tmp2, di*nf2j);
 
@@ -8010,7 +8010,7 @@ void c2s_si_1e(double complex *opij, double *gctr, FINT *dims,
                 gc_1 += nf;
         } }
 }
-void c2s_si_1ei(double complex *opij, double *gctr, FINT *dims,
+void c2s_si_1ei(complex_t *opij, double *gctr, FINT *dims,
                 CINTEnvVars *envs, double *cache)
 {
         FINT *shls = envs->shls;
@@ -8038,7 +8038,7 @@ void c2s_si_1ei(double complex *opij, double *gctr, FINT *dims,
         double *gc_y = gc_x + nf * i_ctr * j_ctr;
         double *gc_z = gc_y + nf * i_ctr * j_ctr;
         double *gc_1 = gc_z + nf * i_ctr * j_ctr;
-        double complex *tmp1, *tmp2;
+        complex_t *tmp1, *tmp2;
         MALLOC_INSTACK(tmp1, nf2i*nf2j);
         MALLOC_INSTACK(tmp2, di*nf2j);
 
@@ -8177,7 +8177,7 @@ static double *sph2e_inner(double *gsph, double *gcart,
  * gctr: Cartesian GTO integrals, ordered as <ik|lj>
  * opij: partial transformed GTO integrals, ordered as <ik|lj>
  */
-void c2s_sf_2e1(double complex *opij, double *gctr, FINT *dims,
+void c2s_sf_2e1(complex_t *opij, double *gctr, FINT *dims,
                 CINTEnvVars *envs, double *cache)
 {
         FINT *shls = envs->shls;
@@ -8203,7 +8203,7 @@ void c2s_sf_2e1(double complex *opij, double *gctr, FINT *dims,
         FINT d_i = di * nfk * nfl;
         FINT d_j = nfk * nfl * nfj;
         FINT i;
-        double complex *tmp1;
+        complex_t *tmp1;
         MALLOC_INSTACK(tmp1, di*nfk*nfl*nf2j);
 
         for (i = 0; i < i_ctr * j_ctr * k_ctr * l_ctr; i++) {
@@ -8213,7 +8213,7 @@ void c2s_sf_2e1(double complex *opij, double *gctr, FINT *dims,
                 opij += no;
         }
 }
-void c2s_sf_2e1i(double complex *opij, double *gctr, FINT *dims,
+void c2s_sf_2e1i(complex_t *opij, double *gctr, FINT *dims,
                  CINTEnvVars *envs, double *cache)
 {
         FINT *shls = envs->shls;
@@ -8239,7 +8239,7 @@ void c2s_sf_2e1i(double complex *opij, double *gctr, FINT *dims,
         FINT d_i = di * nfk * nfl;
         FINT d_j = nfk * nfl * nfj;
         FINT i;
-        double complex *tmp1;
+        complex_t *tmp1;
         MALLOC_INSTACK(tmp1, di*nfk*nfl*nf2j);
 
         for (i = 0; i < i_ctr * j_ctr * k_ctr * l_ctr; i++) {
@@ -8256,7 +8256,7 @@ void c2s_sf_2e1i(double complex *opij, double *gctr, FINT *dims,
  *
  * opij: partial transformed GTO integrals, ordered as <ik|lj>
  */
-void c2s_sf_2e2(double complex *fijkl, double complex *opij, FINT *dims,
+void c2s_sf_2e2(complex_t *fijkl, complex_t *opij, FINT *dims,
                 CINTEnvVars *envs, double *cache)
 {
         FINT *shls = envs->shls;
@@ -8296,10 +8296,10 @@ void c2s_sf_2e2(double complex *fijkl, double complex *opij, FINT *dims,
         FINT ofk = ni * nj * dk;
         FINT ofl = ni * nj * nk * dl;
         FINT ic, jc, kc, lc;
-        double complex *pfijkl;
+        complex_t *pfijkl;
         FINT len1 = nf2k*di*dj*nf2l;
         FINT len2 = dk*di*dj*nf2l;
-        double complex *tmp1, *tmp2;
+        complex_t *tmp1, *tmp2;
         MALLOC_INSTACK(tmp1, len1);
         MALLOC_INSTACK(tmp2, len2);
 
@@ -8316,7 +8316,7 @@ void c2s_sf_2e2(double complex *fijkl, double complex *opij, FINT *dims,
                 opij += nop;
         } } } }
 }
-void c2s_sf_2e2i(double complex *fijkl, double complex *opij, FINT *dims,
+void c2s_sf_2e2i(complex_t *fijkl, complex_t *opij, FINT *dims,
                  CINTEnvVars *envs, double *cache)
 {
         FINT *shls = envs->shls;
@@ -8356,10 +8356,10 @@ void c2s_sf_2e2i(double complex *fijkl, double complex *opij, FINT *dims,
         FINT ofk = ni * nj * dk;
         FINT ofl = ni * nj * nk * dl;
         FINT ic, jc, kc, lc;
-        double complex *pfijkl;
+        complex_t *pfijkl;
         FINT len1 = nf2k*di*dj*nf2l;
         FINT len2 = dk*di*dj*nf2l;
-        double complex *tmp1, *tmp2;
+        complex_t *tmp1, *tmp2;
         MALLOC_INSTACK(tmp1, len1);
         MALLOC_INSTACK(tmp2, len2);
 
@@ -8383,7 +8383,7 @@ void c2s_sf_2e2i(double complex *fijkl, double complex *opij, FINT *dims,
  * gctr: Cartesian GTO integrals, ordered as <ik|lj>
  * opij: partial transformed GTO integrals, ordered as <ik|lj>
  */
-void c2s_si_2e1(double complex *opij, double *gctr, FINT *dims,
+void c2s_si_2e1(complex_t *opij, double *gctr, FINT *dims,
                 CINTEnvVars *envs, double *cache)
 {
         FINT *shls = envs->shls;
@@ -8417,7 +8417,7 @@ void c2s_si_2e1(double complex *opij, double *gctr, FINT *dims,
         double *gc_1 = gc_z + nf * i_ctr * j_ctr * k_ctr * l_ctr;
         FINT len1 = nf2i*nfk*nfl*nf2j;
         FINT len2 = di*nfk*nfl*nf2j;
-        double complex *tmp1, *tmp2;
+        complex_t *tmp1, *tmp2;
         MALLOC_INSTACK(tmp1, len1);
         MALLOC_INSTACK(tmp2, len2);
 
@@ -8439,7 +8439,7 @@ void c2s_si_2e1(double complex *opij, double *gctr, FINT *dims,
                 opij += no;
         }
 }
-void c2s_si_2e1i(double complex *opij, double *gctr, FINT *dims,
+void c2s_si_2e1i(complex_t *opij, double *gctr, FINT *dims,
                  CINTEnvVars *envs, double *cache)
 {
         FINT *shls = envs->shls;
@@ -8473,7 +8473,7 @@ void c2s_si_2e1i(double complex *opij, double *gctr, FINT *dims,
         double *gc_1 = gc_z + nf * i_ctr * j_ctr * k_ctr * l_ctr;
         FINT len1 = nf2i*nfk*nfl*nf2j;
         FINT len2 = di*nfk*nfl*nf2j;
-        double complex *tmp1, *tmp2;
+        complex_t *tmp1, *tmp2;
         MALLOC_INSTACK(tmp1, len1);
         MALLOC_INSTACK(tmp2, len2);
 
@@ -8501,9 +8501,9 @@ void c2s_si_2e1i(double complex *opij, double *gctr, FINT *dims,
  *
  * opij: partial transformed GTO integrals, ordered as <ik|lj>
  */
-static void si2e_swap(double complex *new,
-                      const double complex *oldx, const double complex *oldy,
-                      const double complex *oldz, const double complex *old1,
+static void si2e_swap(complex_t *new,
+                      const complex_t *oldx, const complex_t *oldy,
+                      const complex_t *oldz, const complex_t *old1,
                       const FINT ni, const FINT nj, const FINT nk, const FINT nl)
 {
         FINT i, j, k, l;
@@ -8511,12 +8511,12 @@ static void si2e_swap(double complex *new,
         FINT djo = ni * nk * nl; // stride of (i,k,l,j++)
         FINT djn = nk * ni; // stride of (k,i,j++,l)
         FINT dln = nk * ni * nj; // stride of (k,i,j,l++)
-        double complex *new11 = new;
-        double complex *new12 = new11 + nk * ni * nj * nl;
-        double complex *new21 = new12 + nk * ni * nj * nl;
-        double complex *new22 = new21 + nk * ni * nj * nl;
-        double complex *pn11, *pn12, *pn21, *pn22;
-        const double complex *ox, *oy, *oz, *o1;
+        complex_t *new11 = new;
+        complex_t *new12 = new11 + nk * ni * nj * nl;
+        complex_t *new21 = new12 + nk * ni * nj * nl;
+        complex_t *new22 = new21 + nk * ni * nj * nl;
+        complex_t *pn11, *pn12, *pn21, *pn22;
+        const complex_t *ox, *oy, *oz, *o1;
 
         //tmp1(k    ,i,j,l    ) = opij(m,n,POS_1) + IZ1*opij(m,n,POS_Z)
         //tmp1(k    ,i,j,l+nfl) = opij(m,n,POS_Y) + IZ1*opij(m,n,POS_X)
@@ -8541,7 +8541,7 @@ static void si2e_swap(double complex *new,
                 } }
         } }
 }
-void c2s_si_2e2(double complex *fijkl, double complex *opij, FINT *dims,
+void c2s_si_2e2(complex_t *fijkl, complex_t *opij, FINT *dims,
                 CINTEnvVars *envs, double *cache)
 {
         FINT *shls = envs->shls;
@@ -8581,14 +8581,14 @@ void c2s_si_2e2(double complex *fijkl, double complex *opij, FINT *dims,
         FINT ofk = ni * nj * dk;
         FINT ofl = ni * nj * nk * dl;
         FINT ic, jc, kc, lc;
-        double complex *pfijkl;
-        double complex *ox = opij;
-        double complex *oy = ox + nop * i_ctr * j_ctr * k_ctr * l_ctr;
-        double complex *oz = oy + nop * i_ctr * j_ctr * k_ctr * l_ctr;
-        double complex *o1 = oz + nop * i_ctr * j_ctr * k_ctr * l_ctr;
+        complex_t *pfijkl;
+        complex_t *ox = opij;
+        complex_t *oy = ox + nop * i_ctr * j_ctr * k_ctr * l_ctr;
+        complex_t *oz = oy + nop * i_ctr * j_ctr * k_ctr * l_ctr;
+        complex_t *o1 = oz + nop * i_ctr * j_ctr * k_ctr * l_ctr;
         FINT len1 = nf2k*di*dj*nf2l;
         FINT len2 = dk*di*dj*nf2l;
-        double complex *tmp1, *tmp2;
+        complex_t *tmp1, *tmp2;
         MALLOC_INSTACK(tmp1, len1);
         MALLOC_INSTACK(tmp2, len2);
 
@@ -8609,7 +8609,7 @@ void c2s_si_2e2(double complex *fijkl, double complex *opij, FINT *dims,
                 o1 += nop;
         } } } }
 }
-void c2s_si_2e2i(double complex *fijkl, double complex *opij, FINT *dims,
+void c2s_si_2e2i(complex_t *fijkl, complex_t *opij, FINT *dims,
                  CINTEnvVars *envs, double *cache)
 {
         FINT *shls = envs->shls;
@@ -8649,14 +8649,14 @@ void c2s_si_2e2i(double complex *fijkl, double complex *opij, FINT *dims,
         FINT ofk = ni * nj * dk;
         FINT ofl = ni * nj * nk * dl;
         FINT ic, jc, kc, lc;
-        double complex *pfijkl;
-        double complex *ox = opij;
-        double complex *oy = ox + nop * i_ctr * j_ctr * k_ctr * l_ctr;
-        double complex *oz = oy + nop * i_ctr * j_ctr * k_ctr * l_ctr;
-        double complex *o1 = oz + nop * i_ctr * j_ctr * k_ctr * l_ctr;
+        complex_t *pfijkl;
+        complex_t *ox = opij;
+        complex_t *oy = ox + nop * i_ctr * j_ctr * k_ctr * l_ctr;
+        complex_t *oz = oy + nop * i_ctr * j_ctr * k_ctr * l_ctr;
+        complex_t *o1 = oz + nop * i_ctr * j_ctr * k_ctr * l_ctr;
         FINT len1 = nf2k*di*dj*nf2l;
         FINT len2 = dk*di*dj*nf2l;
-        double complex *tmp1, *tmp2;
+        complex_t *tmp1, *tmp2;
         MALLOC_INSTACK(tmp1, len1);
         MALLOC_INSTACK(tmp2, len2);
 
@@ -8858,7 +8858,7 @@ void c2s_sph_3c2e1_ssc(double *bufijk, double *gctr, FINT *dims,
 /*
  * 3c2e spinor integrals, cartesian to spin free spinor for electron 1.
  */
-void c2s_sf_3c2e1(double complex *opijk, double *gctr, FINT *dims,
+void c2s_sf_3c2e1(complex_t *opijk, double *gctr, FINT *dims,
                   CINTEnvVars *envs, double *cache)
 {
         FINT *shls = envs->shls;
@@ -8895,10 +8895,10 @@ void c2s_sf_3c2e1(double complex *opijk, double *gctr, FINT *dims,
         MALLOC_INSTACK(buf, buflen);
         FINT len1 = di*dk*nf2j;
         FINT len2 = di*dk*dj;
-        double complex *tmp1, *tmp2;
+        complex_t *tmp1, *tmp2;
         MALLOC_INSTACK(tmp1, len1);
         MALLOC_INSTACK(tmp2, len2);
-        double complex *pijk;
+        complex_t *pijk;
 
         for (kc = 0; kc < k_ctr; kc++) {
         for (jc = 0; jc < j_ctr; jc++) {
@@ -8911,7 +8911,7 @@ void c2s_sf_3c2e1(double complex *opijk, double *gctr, FINT *dims,
                 gctr += nf;
         } } }
 }
-void c2s_sf_3c2e1i(double complex *opijk, double *gctr, FINT *dims,
+void c2s_sf_3c2e1i(complex_t *opijk, double *gctr, FINT *dims,
                    CINTEnvVars *envs, double *cache)
 {
         FINT *shls = envs->shls;
@@ -8948,10 +8948,10 @@ void c2s_sf_3c2e1i(double complex *opijk, double *gctr, FINT *dims,
         MALLOC_INSTACK(buf, buflen);
         FINT len1 = di*dk*nf2j;
         FINT len2 = di*dk*dj;
-        double complex *tmp1, *tmp2;
+        complex_t *tmp1, *tmp2;
         MALLOC_INSTACK(tmp1, len1);
         MALLOC_INSTACK(tmp2, len2);
-        double complex *pijk;
+        complex_t *pijk;
 
         for (kc = 0; kc < k_ctr; kc++) {
         for (jc = 0; jc < j_ctr; jc++) {
@@ -8967,7 +8967,7 @@ void c2s_sf_3c2e1i(double complex *opijk, double *gctr, FINT *dims,
 /*
  * 3c2e integrals, cartesian to spinor for electron 1.
  */
-void c2s_si_3c2e1(double complex *opijk, double *gctr, FINT *dims,
+void c2s_si_3c2e1(complex_t *opijk, double *gctr, FINT *dims,
                   CINTEnvVars *envs, double *cache)
 {
         FINT *shls = envs->shls;
@@ -9015,11 +9015,11 @@ void c2s_si_3c2e1(double complex *opijk, double *gctr, FINT *dims,
         FINT len1 = nf2i*dk*nf2j;
         FINT len2 = di*dk*nf2j;
         FINT len3 = di*dk*dj;
-        double complex *tmp1;
+        complex_t *tmp1;
         MALLOC_INSTACK(tmp1, len1+len2+len3);
-        double complex *tmp2 = tmp1 + len1;
-        double complex *tmp3 = tmp2 + len2;
-        double complex *pijk;
+        complex_t *tmp2 = tmp1 + len1;
+        complex_t *tmp3 = tmp2 + len2;
+        complex_t *pijk;
 
         for (kc = 0; kc < k_ctr; kc++) {
         for (jc = 0; jc < j_ctr; jc++) {
@@ -9047,7 +9047,7 @@ void c2s_si_3c2e1(double complex *opijk, double *gctr, FINT *dims,
         } } }
 }
 
-void c2s_si_3c2e1i(double complex *opijk, double *gctr, FINT *dims,
+void c2s_si_3c2e1i(complex_t *opijk, double *gctr, FINT *dims,
                    CINTEnvVars *envs, double *cache)
 {
         FINT *shls = envs->shls;
@@ -9095,11 +9095,11 @@ void c2s_si_3c2e1i(double complex *opijk, double *gctr, FINT *dims,
         FINT len1 = nf2i*dk*nf2j;
         FINT len2 = di*dk*nf2j;
         FINT len3 = di*dk*dj;
-        double complex *tmp1;
+        complex_t *tmp1;
         MALLOC_INSTACK(tmp1, len1+len2+len3);
-        double complex *tmp2 = tmp1 + len1;
-        double complex *tmp3 = tmp2 + len2;
-        double complex *pijk;
+        complex_t *tmp2 = tmp1 + len1;
+        complex_t *tmp3 = tmp2 + len2;
+        complex_t *pijk;
 
         for (kc = 0; kc < k_ctr; kc++) {
         for (jc = 0; jc < j_ctr; jc++) {
@@ -9127,7 +9127,7 @@ void c2s_si_3c2e1i(double complex *opijk, double *gctr, FINT *dims,
         } } }
 }
 
-void c2s_sf_3c2e1_ssc(double complex *opijk, double *gctr, FINT *dims,
+void c2s_sf_3c2e1_ssc(complex_t *opijk, double *gctr, FINT *dims,
                       CINTEnvVars *envs, double *cache)
 {
         FINT *shls = envs->shls;
@@ -9157,10 +9157,10 @@ void c2s_sf_3c2e1_ssc(double complex *opijk, double *gctr, FINT *dims,
         FINT ic, jc, kc;
         FINT len1 = di*nfk*nf2j;
         FINT len2 = di*nfk*dj;
-        double complex *tmp1, *tmp2;
+        complex_t *tmp1, *tmp2;
         MALLOC_INSTACK(tmp1, len1);
         MALLOC_INSTACK(tmp2, len2);
-        double complex *pijk;
+        complex_t *pijk;
 
         for (kc = 0; kc < k_ctr; kc++) {
         for (jc = 0; jc < j_ctr; jc++) {
@@ -9173,7 +9173,7 @@ void c2s_sf_3c2e1_ssc(double complex *opijk, double *gctr, FINT *dims,
         } } }
 }
 
-void c2s_sf_3c2e1i_ssc(double complex *opijk, double *gctr, FINT *dims,
+void c2s_sf_3c2e1i_ssc(complex_t *opijk, double *gctr, FINT *dims,
                        CINTEnvVars *envs, double *cache)
 {
         FINT *shls = envs->shls;
@@ -9203,10 +9203,10 @@ void c2s_sf_3c2e1i_ssc(double complex *opijk, double *gctr, FINT *dims,
         FINT ic, jc, kc;
         FINT len1 = di*nfk*nf2j;
         FINT len2 = di*nfk*dj;
-        double complex *tmp1, *tmp2;
+        complex_t *tmp1, *tmp2;
         MALLOC_INSTACK(tmp1, len1);
         MALLOC_INSTACK(tmp2, len2);
-        double complex *pijk;
+        complex_t *pijk;
 
         for (kc = 0; kc < k_ctr; kc++) {
         for (jc = 0; jc < j_ctr; jc++) {
@@ -9218,7 +9218,7 @@ void c2s_sf_3c2e1i_ssc(double complex *opijk, double *gctr, FINT *dims,
                 gctr += nf;
         } } }
 }
-void c2s_si_3c2e1_ssc(double complex *opijk, double *gctr, FINT *dims,
+void c2s_si_3c2e1_ssc(complex_t *opijk, double *gctr, FINT *dims,
                       CINTEnvVars *envs, double *cache)
 {
         FINT *shls = envs->shls;
@@ -9256,11 +9256,11 @@ void c2s_si_3c2e1_ssc(double complex *opijk, double *gctr, FINT *dims,
         FINT len1 = nf2i*nfk*nf2j;
         FINT len2 = di*nfk*nf2j;
         FINT len3 = di*nfk*dj;
-        double complex *tmp1;
+        complex_t *tmp1;
         MALLOC_INSTACK(tmp1, len1+len2+len3);
-        double complex *tmp2 = tmp1 + len1;
-        double complex *tmp3 = tmp2 + len2;
-        double complex *pijk;
+        complex_t *tmp2 = tmp1 + len1;
+        complex_t *tmp3 = tmp2 + len2;
+        complex_t *pijk;
 
         for (kc = 0; kc < k_ctr; kc++) {
         for (jc = 0; jc < j_ctr; jc++) {
@@ -9283,7 +9283,7 @@ void c2s_si_3c2e1_ssc(double complex *opijk, double *gctr, FINT *dims,
                 gc_1 += nf;
         } } }
 }
-void c2s_si_3c2e1i_ssc(double complex *opijk, double *gctr, FINT *dims,
+void c2s_si_3c2e1i_ssc(complex_t *opijk, double *gctr, FINT *dims,
                        CINTEnvVars *envs, double *cache)
 {
         FINT *shls = envs->shls;
@@ -9321,11 +9321,11 @@ void c2s_si_3c2e1i_ssc(double complex *opijk, double *gctr, FINT *dims,
         FINT len1 = nf2i*nfk*nf2j;
         FINT len2 = di*nfk*nf2j;
         FINT len3 = di*nfk*dj;
-        double complex *tmp1;
+        complex_t *tmp1;
         MALLOC_INSTACK(tmp1, len1+len2+len3);
-        double complex *tmp2 = tmp1 + len1;
-        double complex *tmp3 = tmp2 + len2;
-        double complex *pijk;
+        complex_t *tmp2 = tmp1 + len1;
+        complex_t *tmp3 = tmp2 + len2;
+        complex_t *pijk;
 
         for (kc = 0; kc < k_ctr; kc++) {
         for (jc = 0; jc < j_ctr; jc++) {
@@ -9385,28 +9385,28 @@ double *CINTc2s_ket_sph1(double *sph, double *cart, FINT lds, FINT ldc, FINT l)
 {
         return (c2s_ket_sph1[l])(sph, cart, lds, ldc, l);
 }
-void CINTc2s_bra_spinor_e1sf(double complex *gsp, FINT nket,
+void CINTc2s_bra_spinor_e1sf(complex_t *gsp, FINT nket,
                              double *gcart, FINT kappa, FINT l)
 {
         (c2s_bra_spinor_e1sf[l])(gsp, nket, gcart, kappa, l);
 }
-void CINTc2s_bra_spinor_sf(double complex *gsp, FINT nket,
-                           double complex *gcart, FINT kappa, FINT l)
+void CINTc2s_bra_spinor_sf(complex_t *gsp, FINT nket,
+                           complex_t *gcart, FINT kappa, FINT l)
 {
         (c2s_bra_spinor_sf[l])(gsp, nket, gcart, kappa, l);
 }
-void CINTc2s_ket_spinor(double complex *gsp, FINT nbra,
-                        double complex *gcart, FINT kappa, FINT l)
+void CINTc2s_ket_spinor(complex_t *gsp, FINT nbra,
+                        complex_t *gcart, FINT kappa, FINT l)
 {
         (c2s_ket_spinor[l])(gsp, nbra, gcart, kappa, l);
 }
-void CINTc2s_iket_spinor(double complex *gsp, FINT nbra,
-                         double complex *gcart, FINT kappa, FINT l)
+void CINTc2s_iket_spinor(complex_t *gsp, FINT nbra,
+                         complex_t *gcart, FINT kappa, FINT l)
 {
         (c2s_iket_spinor[l])(gsp, nbra, gcart, kappa, l);
 }
-void CINTc2s_bra_spinor_si(double complex *gsp, FINT nket,
-                           double complex *gcart, FINT kappa, FINT l)
+void CINTc2s_bra_spinor_si(complex_t *gsp, FINT nket,
+                           complex_t *gcart, FINT kappa, FINT l)
 {
         (c2s_bra_spinor_si[l])(gsp, nket, gcart, kappa, l);
 }
@@ -9416,7 +9416,7 @@ void CINTc2s_bra_spinor_si(double complex *gsp, FINT nket,
  * vectors gspa and gspb are the upper and lower components of the
  * two-component vector
  */
-void CINTc2s_ket_spinor_sf1(double complex *gspa, double complex *gspb, double *gcart,
+void CINTc2s_ket_spinor_sf1(complex_t *gspa, complex_t *gspb, double *gcart,
                             FINT lds, FINT ldc, FINT nctr, FINT kappa, FINT l)
 {
         FINT nf = (l+1)*(l+2)/2;
@@ -9429,7 +9429,7 @@ void CINTc2s_ket_spinor_sf1(double complex *gspa, double complex *gspb, double *
                 gcart += nf * ldc;
         }
 }
-void CINTc2s_iket_spinor_sf1(double complex *gspa, double complex *gspb, double *gcart,
+void CINTc2s_iket_spinor_sf1(complex_t *gspa, complex_t *gspb, double *gcart,
                              FINT lds, FINT ldc, FINT nctr, FINT kappa, FINT l)
 {
         FINT nf = (l+1)*(l+2)/2;
@@ -9442,7 +9442,7 @@ void CINTc2s_iket_spinor_sf1(double complex *gspa, double complex *gspb, double 
                 gcart += nf * ldc;
         }
 }
-void CINTc2s_ket_spinor_si1(double complex *gspa, double complex *gspb, double *gcart,
+void CINTc2s_ket_spinor_si1(complex_t *gspa, complex_t *gspb, double *gcart,
                             FINT lds, FINT ldc, FINT nctr, FINT kappa, FINT l)
 {
         FINT nf = (l+1)*(l+2)/2;
@@ -9452,7 +9452,7 @@ void CINTc2s_ket_spinor_si1(double complex *gspa, double complex *gspb, double *
         double *gc_y = gc_x + nctr*ngc;
         double *gc_z = gc_y + nctr*ngc;
         double *gc_1 = gc_z + nctr*ngc;
-        double complex *tmp = malloc(sizeof(double complex)*ngc*4);
+        complex_t *tmp = malloc(sizeof(complex_t)*ngc*4);
         FINT k;
 
         for (k = 0; k < nctr; k++) {
@@ -9470,7 +9470,7 @@ void CINTc2s_ket_spinor_si1(double complex *gspa, double complex *gspb, double *
         }
         free(tmp);
 }
-void CINTc2s_iket_spinor_si1(double complex *gspa, double complex *gspb, double *gcart,
+void CINTc2s_iket_spinor_si1(complex_t *gspa, complex_t *gspb, double *gcart,
                              FINT lds, FINT ldc, FINT nctr, FINT kappa, FINT l)
 {
         FINT nf = (l+1)*(l+2)/2;
@@ -9480,7 +9480,7 @@ void CINTc2s_iket_spinor_si1(double complex *gspa, double complex *gspb, double 
         double *gc_y = gc_x + nctr*ngc;
         double *gc_z = gc_y + nctr*ngc;
         double *gc_1 = gc_z + nctr*ngc;
-        double complex *tmp = malloc(sizeof(double complex)*ngc*4);
+        complex_t *tmp = malloc(sizeof(complex_t)*ngc*4);
         FINT k;
 
         for (k = 0; k < nctr; k++) {
