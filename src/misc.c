@@ -37,7 +37,7 @@ void CINTdcmplx_pn(const FINT n, complex_t *z,
 {
         FINT i;
         for (i = 0; i < n; i++) {
-                z[i] = Complex_t(re[i], im[i]);
+                z[i] = Complex_t(re[i], - im[i]);
         }
 }
 void CINTdcmplx_np(const FINT n, complex_t *z,
@@ -45,7 +45,7 @@ void CINTdcmplx_np(const FINT n, complex_t *z,
 {
         FINT i;
         for (i = 0; i < n; i++) {
-                z[i] = -Complex_t(re[i], im[i]);
+                z[i] = Complex_t(-re[i], im[i]);
         }
 }
 void CINTdcmplx_nn(const FINT n, complex_t *z,
@@ -53,7 +53,7 @@ void CINTdcmplx_nn(const FINT n, complex_t *z,
 {
         FINT i;
         for (i = 0; i < n; i++) {
-                z[i] = -Complex_t(re[i], im[i]);
+                z[i] = Complex_t(-re[i], - im[i]);
         }
 }
 
