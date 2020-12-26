@@ -3338,7 +3338,7 @@ static void a_ket_cart2spinor(complex_t *gsp, FINT nbra,
 static void a_iket_cart2spinor(complex_t *gsp, FINT nbra,
                                complex_t *gcart, FINT kappa, FINT l)
 {
-        const complex_t ZI = complex_t(0, 1);
+        const complex_t ZI = Complex_t(0, 1);
         FINT nf = (l+1)*(l+2)/2;
         FINT nd = _len_spinor(kappa, l);
         const complex_t *coeff_c2s;
@@ -5756,7 +5756,7 @@ static void a_iket_cart2spinor_e1sf(complex_t *gspa, complex_t *gspb,
                                     FINT lds, FINT nbra, FINT kappa, FINT l)
 {
         const complex_t Z0 = 0;
-        const complex_t ZI = complex_t(0, 1);
+        const complex_t ZI = Complex_t(0, 1);
         const char TRANS_N = 'N';
         FINT nf = (l+1)*(l+2)/2;
         FINT nf2 = nf * 2;

@@ -12,7 +12,7 @@ void CINTdcmplx_re(const FINT n, complex_t *z, const double *re)
 {
         FINT i;
         for (i = 0; i < n; i++) {
-                z[i] = complex_t(re[i], 0);
+                z[i] = Complex_t(re[i], 0);
         }
 }
 
@@ -20,7 +20,7 @@ void CINTdcmplx_im(const FINT n, complex_t *z, const double *im)
 {
         FINT i;
         for (i = 0; i < n; i++) {
-                z[i] = complex_t(0, im[i]);
+                z[i] = Complex_t(0, im[i]);
         }
 }
 
@@ -29,7 +29,7 @@ void CINTdcmplx_pp(const FINT n, complex_t *z,
 {
         FINT i;
         for (i = 0; i < n; i++) {
-                z[i] = complex_t(re[i], im[i]);
+                z[i] = Complex_t(re[i], im[i]);
         }
 }
 void CINTdcmplx_pn(const FINT n, complex_t *z,
@@ -37,7 +37,7 @@ void CINTdcmplx_pn(const FINT n, complex_t *z,
 {
         FINT i;
         for (i = 0; i < n; i++) {
-                z[i] = complex_t(re[i], im[i]);
+                z[i] = Complex_t(re[i], im[i]);
         }
 }
 void CINTdcmplx_np(const FINT n, complex_t *z,
@@ -45,7 +45,7 @@ void CINTdcmplx_np(const FINT n, complex_t *z,
 {
         FINT i;
         for (i = 0; i < n; i++) {
-                z[i] = -complex_t(re[i], im[i]);
+                z[i] = -Complex_t(re[i], im[i]);
         }
 }
 void CINTdcmplx_nn(const FINT n, complex_t *z,
@@ -53,7 +53,7 @@ void CINTdcmplx_nn(const FINT n, complex_t *z,
 {
         FINT i;
         for (i = 0; i < n; i++) {
-                z[i] = -complex_t(re[i], im[i]);
+                z[i] = -Complex_t(re[i], im[i]);
         }
 }
 
