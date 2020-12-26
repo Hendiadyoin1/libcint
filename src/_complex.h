@@ -6,3 +6,4 @@
     #define complex_t _Dcomplex
 #elif defined(__GNUC__) // GCC
     #define complex_t double complex
+#endif
